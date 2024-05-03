@@ -99,22 +99,22 @@ def InitialiseFWGlobals():
         raise
 
     if platform.system() == "Linux":
-        # **********************************************************
-        # TODO: First attempt at Linux support. 
-        # As of Apr2024, FW installation has changed to use flatpak
-        # and this no longer works.
-        # **********************************************************
-        # On Linux, for installed versions of Flex,
+        # On Linux, for apt installed versions of Flex,
         # FWREG_CODEDIR points to /usr/share/fieldworks,
         # but FieldWorks.exe resides in /usr/lib/fieldworks.
         # I can't find any registry keys/values that point to
         # the correct location.
         # For installed version, the app calls /bin/fieldworks-flex
-        # from /usr/share/applications/fieldworks-applicatoins.desktop,
+        # from /usr/share/applications/fieldworks-applications.desktop,
         # which in turn calls /usr/lib/fieldworks/run-app FieldWorks.exe etc.
         #
-        # The following is based on the logic in /usr/lib/fieldworks/environ
-        FWCodeDir = os.path.join(rKey.GetValue(FWREG_CODEDIR), "../../lib/fieldworks")
+        # For flatpak installations, the default is at /var/lib/flatpak/app/org.sil.FieldWorks/current/active/files/lib/fieldworks
+        # Check  for flatpak by @n8marti
+        if rKey.GetValue(FWREG_CODEDIR).split('/')[1] == 'app':  # flatpak
+            FWCodeDir = '/var/lib/flatpak/app/org.sil.FieldWorks/current/active/files/lib/fieldworks'
+        else:
+            # The following is based on the logic in /usr/lib/fieldworks/environ for apt
+            FWCodeDir = os.path.join(rKey.GetValue(FWREG_CODEDIR), "../../lib/fieldworks")
     else:
         # On windows, FWREG_CODEDIR is correct.
         FWCodeDir = rKey.GetValue(FWREG_CODEDIR)
